@@ -1,9 +1,69 @@
-import React from "react";
+import React, { useState } from "react";
 import TrelloCard from "./TrelloCard";
 import TrelloActionButton from "./TrelloActionButton";
+import styled from "styled-components";
 import { Droppable, Draggable } from "react-beautiful-dnd";
+import { editTitle } from "../actions";
+import { connect } from "react-redux";
 
-export default function TrelloList({ title, cards, listID, index }) {
+const TitleContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+`;
+
+const ListTitle = styled.h4`
+  transition: background 0.3s ease-in;
+  ${TitleContainer}:hover & {
+    background: #ccc;
+  }
+`;
+
+function TrelloList({ title, cards, listID, index, dispatch }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [listTitle, setListTitle] = useState(title);
+
+  const StyledInput = styled.input`
+    width: 100%;
+    border: none;
+    outline-color: blue;
+    border-radius: 3px;
+    margin-bottom: 3px;
+    padding: 5px;
+  `;
+
+  const renderEditInput = () => {
+    return (
+      <form onSubmit={handleFinishEditing}>
+        <StyledInput
+          type="text"
+          value={listTitle}
+          onChange={handleChange}
+          autoFocus
+          onFocus={handleFocus}
+          onBlur={handleFinishEditing}
+        />
+      </form>
+    );
+  };
+
+  const handleFocus = (e) => {
+    e.target.select();
+  };
+
+  const handleChange = (e) => {
+    e.preventDefault();
+    setListTitle(e.target.value);
+  };
+
+  const handleFinishEditing = (e) => {
+    setIsEditing(false);
+    dispatch(editTitle(listID, listTitle));
+  };
+
   return (
     <Draggable draggableId={String(listID)} index={index}>
       {(provider) => (
@@ -16,7 +76,13 @@ export default function TrelloList({ title, cards, listID, index }) {
           <Droppable droppableId={String(listID)}>
             {(provider) => (
               <div {...provider.droppableProps} ref={provider.innerRef}>
-                <h4>{title}</h4>
+                {isEditing ? (
+                  renderEditInput()
+                ) : (
+                  <TitleContainer onClick={() => setIsEditing(true)}>
+                    <ListTitle>{listTitle}</ListTitle>
+                  </TitleContainer>
+                )}
                 {cards.map((card, index) => (
                   <TrelloCard
                     index={index}
@@ -35,3 +101,4 @@ export default function TrelloList({ title, cards, listID, index }) {
     </Draggable>
   );
 }
+export default connect()(TrelloList);

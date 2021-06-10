@@ -99,6 +99,14 @@ const listsReducer = (state = initialState, action) => {
       }
       return newState;
 
+    case CONSTANTS.EDIT_LIST_TITLE: {
+      const { listID, newTitle } = action.payload;
+      return {
+        ...state,
+        [listID]: { ...state[listID], title: newTitle },
+      };
+    }
+
     default:
       return state;
   }

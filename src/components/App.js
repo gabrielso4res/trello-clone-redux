@@ -28,6 +28,7 @@ class App extends Component {
 
   render() {
     const { lists } = this.props;
+    console.log(lists);
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="App">
